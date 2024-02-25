@@ -1,0 +1,35 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '3.2.3'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.trustpilot'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '21'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+
+	implementation 'org.jsoup:jsoup:1.17.2'
+	implementation 'org.apache.logging.log4j:log4j-core:2.23.0'
+	implementation 'org.apache.logging.log4j:log4j-api:2.23.0'
+	implementation 'io.r2dbc:r2dbc-pool:1.0.1.RELEASE'
+
+	implementation 'mysql:mysql-connector-java:8.0.33'
+
+	implementation 'dev.miku:r2dbc-mysql:0.8.2.RELEASE'
+
+	implementation 'com.google.code.gson:gson:2.10.1'
+}
