@@ -1,5 +1,6 @@
 MySQL migration:
 
+````
 CREATE TABLE IF NOT EXISTS domain
 (
     id          BIGINT(20)   NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -15,3 +16,4 @@ create table domain_review
     review_counts bigint       not null,
     rating        double       not null
 );
+````
