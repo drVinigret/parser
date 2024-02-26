@@ -3,20 +3,26 @@ package com.trustpilot.parser.service;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.trustpilot.parser.model.DomainReview;
-import java.io.IOException;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 public class PageParser {
   private final Logger logger = LogManager.getLogger();
+  private final WebClient webClient;
+
+  public PageParser(WebClient webClient) {
+    this.webClient = webClient;
+  }
 
   public Mono<DomainReview> parsePage(String url) {
     return Mono.fromCallable(() -> url)
-      .mapNotNull(this::getDocumentFromPage)
+      .flatMap(this::getDocumentFromPage)
       .map(this::getBusinessUnit)
       .map(this::getDomainReview)
       .doOnNext(domainReview -> logger.info("[PageParser] Data after parsing: {}", domainReview))
@@ -26,17 +32,18 @@ public class PageParser {
       }));
   }
 
-  private Document getDocumentFromPage(String url) {
-    try {
-      return Jsoup.connect(url).get();
-    } catch (IOException e) {
-      logger.error("[PageParser] Error parsing page", e);
-    }
-    return null;
+  private Mono<Document> getDocumentFromPage(String url) {
+    return webClient.get()
+      .uri(url)
+      .retrieve()
+      .bodyToMono(String.class)
+      .map(Jsoup::parse)
+      .doOnError(error -> logger.error("[PageParser] Error parsing page", error));
   }
 
   private JsonObject getBusinessUnit(Document document) {
-    return Optional.ofNullable(document.select("script#__NEXT_DATA__").first().firstChild())
+    return Optional.ofNullable(document.select("script#__NEXT_DATA__").first())
+      .map(Element::firstChild)
       .map(node -> {
         String scriptData = String.valueOf(node);
         return JsonParser.parseString(scriptData).getAsJsonObject();
